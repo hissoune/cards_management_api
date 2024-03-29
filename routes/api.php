@@ -27,7 +27,7 @@ Route::post('login',[UserAuthController::class,'login']);
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/business_cards', [BusinessCardController::class,'createBusinessCard'])->name('business_cards');
     Route::post('/update_business_cards/{id}', [BusinessCardController::class,'updateBusinessCard'])->name('update_business_cards');
-    Route::post('/deletcard/{id}',[BusinessCardController::class ,'deleteBusinessCard']);
+    Route::delete('/delete_card/{id}', [BusinessCardController::class ,'deleteBusinessCard'])->name('delete_card');
     Route::get('getCards',[BusinessCardController::class ,'getAllBusinessCards']);
     
     

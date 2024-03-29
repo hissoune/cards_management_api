@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
 use App\Models\BusinessCard;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -134,27 +132,22 @@ class BusinessCardController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function deleteBusinessCard($id)
-    {
-        $user = Auth::user();
 
-        $businessCard = BusinessCard::find($id);
+     public function deleteBusinessCard($id)
+{
+    $user = Auth::user();
+    $businessCard = BusinessCard::find($id);
 
-
-        if (!$businessCard) {
-            return response()->json(['message' => 'Business card not found'], 404);
-        }
-
-
-        // police service
-        if ($user->id !== $businessCard->user_id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-
-
-        $businessCard->delete();
-
-        return response()->json(['message' => 'Business card deleted successfully']);
+    if (!$businessCard) {
+        return response()->json(['message' => 'Business card not found'], 404);
+    
+    } elseif($user->id !== $businessCard->user_id) {
+        return response()->json(['message' => 'Unauthorized'], 403);
     }
+
+    $businessCard->delete();
+
+    return response()->json(['message' => 'Business card deleted successfully']);
+}
+
 }
