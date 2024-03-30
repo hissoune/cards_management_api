@@ -1,11 +1,24 @@
 <?php
 
+
 namespace App\Http\Controllers;
 
 use App\Models\BusinessCard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+/**
+ * @OA\Schema(
+ *     schema="BusinessCard",
+ *     required={"id", "name", "company", "title", "email", "phone"},
+ *     @OA\Property(property="id", type="integer", example=1),
+ *     @OA\Property(property="name", type="string", example="John Doe"),
+ *     @OA\Property(property="company", type="string", example="ABC Inc."),
+ *     @OA\Property(property="title", type="string", example="CEO"),
+ *     @OA\Property(property="email", type="string", format="email", example="john@example.com"),
+ *     @OA\Property(property="phone", type="string", example="123456789"),
+ * )
+ */
 
 class BusinessCardController extends Controller
 {
@@ -17,8 +30,27 @@ class BusinessCardController extends Controller
         //
     }
 
-    /**
-     * Show the form for creating a new resource.
+   /**
+     * Display all business cards of the authenticated user.
+     *
+     * @OA\Get(
+     *     path="/business_cards",
+     *     summary="Get all business cards",
+     *     tags={"Business Cards"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/BusinessCard")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated"
+     *     )
+     * )
      */
     public function getAllBusinessCards()
     {
@@ -28,7 +60,42 @@ class BusinessCardController extends Controller
         return response()->json(['business_cards' => $businessCards]);
     }
     /**
-     * Store a newly created resource in storage.
+     * Create a new business card.
+     *
+     * @OA\Post(
+     *     path="/business_cards",
+     *     summary="Create a new business card",
+     *     tags={"Business Cards"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Business card data",
+     *         @OA\JsonContent(
+     *             required={"name", "company", "title", "email", "phone"},
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="company", type="string", example="ABC Inc."),
+     *             @OA\Property(property="title", type="string", example="CEO"),
+     *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
+     *             @OA\Property(property="phone", type="string", example="123456789"),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Business card created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Business card created successfully"),
+     *             @OA\Property(property="card", ref="#/components/schemas/BusinessCard")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated"
+     *     )
+     * )
      */
     public function createBusinessCard(Request $request)
     {
@@ -60,7 +127,62 @@ class BusinessCardController extends Controller
 
         return response()->json(['message' => 'Business card created successfully', 'card' => $businessCard]);
     }
-
+    
+    /**
+     * Update an existing business card.
+     *
+     * @OA\Post(
+     *     path="/update_business_cards/{id}",
+     *     summary="Update an existing business card",
+     *     tags={"Business Cards"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the business card to update",
+     *         @OA\Schema(
+     *             type="integer",
+     *         ),
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Updated business card data",
+     *         @OA\JsonContent(
+     *             required={"name", "company", "title", "email", "phone"},
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="company", type="string", example="ABC Inc."),
+     *             @OA\Property(property="title", type="string", example="CEO"),
+     *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
+     *             @OA\Property(property="phone", type="string", example="123456789"),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Business card updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Business card updated successfully"),
+     *             @OA\Property(property="card", ref="#/components/schemas/BusinessCard")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Business card not found",
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Unauthorized to update this business card",
+     *     )
+     * )
+     */
     public function updateBusinessCard(Request $request, $id)
     {
         
@@ -129,10 +251,44 @@ class BusinessCardController extends Controller
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
+   /**
+     * Delete a business card.
+     *
+     * @OA\Delete(
+     *     path="/delete_card/{id}",
+     *     summary="Delete a business card",
+     *     tags={"Business Cards"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the business card to delete",
+     *         @OA\Schema(
+     *             type="integer",
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Business card deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Business card deleted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Business card not found",
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Unauthorized to delete this business card",
+     *     )
+     * )
      */
-
      public function deleteBusinessCard($id)
 {
     $user = Auth::user();
